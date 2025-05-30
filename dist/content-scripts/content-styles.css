@@ -1,3 +1,19 @@
+/* --- AuthForm & MeetAuthPanel CSS Reset (moved to top, minimal reset) --- */
+.meet-auth-panel button,
+.meet-auth-panel input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  box-sizing: border-box;
+  font: inherit;
+  color: inherit;
+  outline: none;
+}
+
+.meet-auth-panel button {
+  cursor: pointer;
+}
+
 /* Advanced UI styles for the Google Meet Bot */
 #meet-bot-control-panel {
   font-family: "Google Sans", "Roboto", sans-serif;
@@ -473,3 +489,187 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
 }
+
+/* --- MeetAuthPanel custom styles --- */
+.meet-auth-panel {
+  background: rgba(32, 33, 36, 0.98);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  max-width: 340px;
+  margin: 0 auto;
+  color: #fff;
+  font-family: 'Google Sans', 'Segoe UI', Roboto, Arial, sans-serif;
+  animation: fadeIn 0.5s ease-out;
+}
+.meet-auth-panel h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+  color: #00c6ae;
+  text-align: center;
+}
+.meet-auth-panel form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.meet-auth-panel input[type="email"],
+.meet-auth-panel input[type="password"],
+.meet-auth-panel input[type="text"] {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background: #23272b;
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s;
+}
+.meet-auth-panel input:focus {
+  border-color: #00c6ae;
+}
+.meet-auth-panel .auth-error {
+  color: #ff6b6b;
+  background: rgba(255,107,107,0.08);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  text-align: center;
+}
+.meet-auth-panel .auth-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+.meet-auth-panel button {
+  background: linear-gradient(135deg, #00c6ae, #00a89e);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0,198,174,0.12);
+}
+.meet-auth-panel button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.meet-auth-panel .switch-auth-mode {
+  background: none;
+  color: #4dabf7;
+  border: none;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-left: 0.5rem;
+  padding: 0;
+}
+.meet-auth-panel .auth-loading {
+  color: #00c6ae;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+/* --- End MeetAuthPanel custom styles --- */
+
+/* --- AuthForm custom styles inside MeetAuthPanel --- */
+.meet-auth-panel .auth-form-tabs {
+  display: flex;
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.meet-auth-panel .auth-form-tab {
+  flex: 1;
+  padding: 0.75rem 0;
+  background: #23272b;
+  color: #9ca3af;
+  border: none;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.meet-auth-panel .auth-form-tab.active {
+  background: linear-gradient(135deg, #00c6ae, #00a89e);
+  color: #000;
+}
+.meet-auth-panel form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.meet-auth-panel input[type="email"],
+.meet-auth-panel input[type="password"],
+.meet-auth-panel input[type="text"] {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #444;
+  background: #181a1b;
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.meet-auth-panel input:focus {
+  border-color: #00c6ae;
+  box-shadow: 0 0 0 2px rgba(0,198,174,0.15);
+}
+.meet-auth-panel button[type="submit"] {
+  background: linear-gradient(135deg, #00c6ae, #00a89e);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0,198,174,0.12);
+}
+.meet-auth-panel button[type="submit"]:hover:not(:disabled) {
+  background: linear-gradient(135deg, #00d6ba, #00b8ac);
+}
+.meet-auth-panel button[type="submit"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.meet-auth-panel .auth-form-hint {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+.meet-auth-panel .auth-form-error {
+  color: #ff6b6b;
+  background: rgba(255,107,107,0.08);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  text-align: center;
+  border: 1px solid #ff6b6b22;
+}
+.meet-auth-panel .auth-form-switch {
+  background: none;
+  color: #4dabf7;
+  border: none;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-left: 0.5rem;
+  padding: 0;
+}
+.meet-auth-panel .auth-form-loading {
+  color: #00c6ae;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+/* --- End AuthForm custom styles --- */

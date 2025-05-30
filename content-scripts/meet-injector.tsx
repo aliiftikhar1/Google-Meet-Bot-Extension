@@ -1,6 +1,7 @@
 import React from "react"
 import { createRoot } from "react-dom/client"
 import MeetControlPanel from "./components/MeetControlPanel"
+import MeetAuthPanel from "./components/MeetAuthPanel"
 
 // Stronger type definitions
 type BotStatus = "idle" | "awaiting" | "joined" | "stopped" | "error"
@@ -12,11 +13,13 @@ type PortMessage = {
 }
 
 // Extension state
+
 interface ExtensionState {
   port: chrome.runtime.Port | null
   status: BotStatus
   retryCount: number
   observer: MutationObserver | null
+  isAuthenticated: boolean // Add authentication state
 }
 
 const state: ExtensionState = {
@@ -24,6 +27,7 @@ const state: ExtensionState = {
   status: "idle",
   retryCount: 0,
   observer: null,
+  isAuthenticated: false, // Initialize as false
 }
 
 // Constants
@@ -105,7 +109,12 @@ function initializePort(): void {
     })
 
     state.port.onDisconnect.addListener(() => {
-      console.log("Port disconnected, attempting to reconnect...")
+      // Log the disconnect reason if available
+      if (chrome.runtime.lastError) {
+        console.warn("Port disconnected. lastError:", chrome.runtime.lastError.message)
+      } else {
+        console.log("Port disconnected, attempting to reconnect...")
+      }
       state.port = null // Clear the port reference
 
       if (state.retryCount < MAX_RETRIES) {
@@ -284,6 +293,32 @@ async function loadStyles(): Promise<string> {
   }
 }
 
+function hasAuthTokens(): boolean {
+  try {
+    const authTokens = localStorage.getItem('authTokens');
+    if (!authTokens) {
+
+      console.log('No auth tokens found in localStorage');
+      return false;
+    }
+    const parsedTokens = JSON.parse(authTokens);
+    console.log('Auth tokens found:', parsedTokens);
+    return true; 
+  } catch (error) {
+    console.error('Error checking auth tokens:', error);
+    return false;
+  }
+}
+
+let reactRoot: ReturnType<typeof createRoot> | null = null;
+let reactAppRoot: HTMLDivElement | null = null;
+let renderPanel: (() => void) | null = null;
+
+const handleAuthSuccess = () => {
+  state.isAuthenticated = true;
+  if (renderPanel) renderPanel();
+};
+
 // Inject the control panel into Google Meet
 async function injectControlPanel(): Promise<void> {
   console.log("Checking if meeting is active...")
@@ -292,6 +327,26 @@ async function injectControlPanel(): Promise<void> {
   if (!isMeetingActive()) {
     console.log("Meeting not active yet, skipping injection")
     return
+  }
+
+  // Check for auth tokens before rendering
+  try {
+    const tokensRaw = localStorage.getItem("authTokens");
+    if (tokensRaw) {
+      try {
+        const tokens = JSON.parse(tokensRaw);
+        if (tokens && tokens.access && tokens.refresh) {
+          state.isAuthenticated = true;
+        }
+      } catch (e) {
+        // Invalid token, ignore
+        state.isAuthenticated = false;
+      }
+    } else {
+      state.isAuthenticated = false;
+    }
+  } catch (e) {
+    state.isAuthenticated = false;
   }
 
   console.log("Meeting is active, attempting to inject control panel...")
@@ -323,7 +378,6 @@ async function injectControlPanel(): Promise<void> {
       zIndex: "999999",
       maxWidth: "400px",
       overflow: "hidden",
-      boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
       backgroundColor: "transparent",
       border: "none",
       transform: "translateZ(0)",
@@ -370,21 +424,33 @@ async function injectControlPanel(): Promise<void> {
     console.log("Creating mount point...")
     // Create mount point for React
     const appRoot = document.createElement("div")
-    appRoot.className = "meet-bot-control-panel" // Add a class for React to target
+    appRoot.className = state.isAuthenticated ? "meet-bot-control-panel" : "meet-auth-panel" // Add custom class
     shadowRoot.appendChild(appRoot)
+
+    // Save references for re-rendering
+    reactAppRoot = appRoot
+    reactRoot = createRoot(appRoot)
+
+    renderPanel = () => {
+      if (!reactRoot || !reactAppRoot) return;
+      reactAppRoot.className = state.isAuthenticated ? "meet-bot-control-panel" : "meet-auth-panel";
+      reactRoot.render(
+        <React.StrictMode>
+          {state.isAuthenticated ? (
+            <MeetControlPanel initialStatus={state.status === "error" ? "stopped" : state.status} />
+          ) : (
+            <MeetAuthPanel onAuth={handleAuthSuccess} />
+          )}
+        </React.StrictMode>
+      );
+    };
 
     console.log("Adding panel to DOM...")
     // Add to DOM
     meetContainer.appendChild(panelHost)
 
     console.log("Rendering React component...")
-    // Render React component
-    const root = createRoot(appRoot)
-    root.render(
-      <React.StrictMode>
-        <MeetControlPanel initialStatus={state.status === "error" ? "stopped" : state.status} />
-      </React.StrictMode>,
-    )
+    renderPanel();
 
     console.log("Control panel injected successfully")
   } catch (error) {

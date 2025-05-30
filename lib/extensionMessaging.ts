@@ -1,4 +1,3 @@
-// Chrome Extension messaging utilities
 
 type BotStatus = "idle" | "awaiting" | "joined" | "stopped"
 

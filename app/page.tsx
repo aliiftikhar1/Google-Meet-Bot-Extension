@@ -3,8 +3,10 @@
 import { useState, useEffect, FormEvent } from "react"
 import { getCurrentTab, checkIfGoogleMeet, sendMessageToContentScript } from '../lib/extensionMessaging'
 import { injectContentScript, isScriptInjected, getCurrentTabUrl } from '../lib/chromeUtils';
-import StatusIndicator from '../components/StatusIndicator';
-import ActionButton from '../components/ActionButton';
+import AuthForm from '../components/AuthForm';
+import Header from '../components/Header';
+import MeetingStatusPanel from '../components/MeetingStatusPanel';
+import Footer from '../components/Footer';
 
 // Types
 type User = { 
@@ -34,7 +36,8 @@ type ActionButtonProps = {
 
 // API URLs
 // const API_BASE_URL = "https://ai-notetaker-backend-fwew.onrender.com";
-const API_BASE_URL = "http://localhost:8000";
+// const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = "https://ainotestakerbackend.trylenoxinstruments.com";
 const API_ENDPOINTS = {
   login: `${API_BASE_URL}/auth/login/`,
   signup: `${API_BASE_URL}/auth/signup/`,
@@ -59,11 +62,6 @@ const handleApiError = (error: any): string => {
   }
   return 'An unexpected error occurred';
 }
-
-// Mock data for meetings
-const mockMeetings: Meeting[] = [
-  { url: "https://meet.google.com/abc-defg-hij", status: "idle" }
-];
 
 // Hook to handle Chrome extension functionality
 const useChromeExtension = (user: User | null) => {
@@ -233,6 +231,7 @@ export default function Popup() {
     setError(null);
     const form = e.currentTarget;
     const email = (form.elements.namedItem("email") as HTMLInputElement).value;
+    const full_name = (form.elements.namedItem("full_name") as HTMLInputElement).value;
     const password = (form.elements.namedItem("password") as HTMLInputElement).value;
     const confirmPassword = (form.elements.namedItem("confirmPassword") as HTMLInputElement).value;
     if (password !== confirmPassword) {
@@ -244,7 +243,7 @@ export default function Popup() {
       const response = await fetch(API_ENDPOINTS.signup, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, full_name  }),
       });
       const data = await response.json();
       if (response.ok) {
@@ -312,100 +311,16 @@ export default function Popup() {
   if (!user) {
     return (
       <div className="w-full h-full p-5 bg-gradient-to-br from-slate-50 via-white to-slate-50 flex flex-col">
-        <header className="mb-5 text-center">
-          <div className="flex items-center justify-center mb-2">
-            <div className="bg-gradient-to-r from-emerald-500 to-teal-500 p-2 rounded-xl shadow-md">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="drop-shadow-sm"
-              >
-                <path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"></path>
-                <path d="M12 8v1"></path>
-                <path d="M12 15v1"></path>
-                <path d="M16 12h-1"></path>
-                <path d="M9 12H8"></path>
-                <path d="M15.7 9.7l-.7.7"></path>
-                <path d="M9.7 9.7l-.7-.7"></path>
-                <path d="M15.7 14.3l-.7-.7"></path>
-                <path d="M9.7 14.3l-.7.7"></path>
-              </svg>
-            </div>
-          </div>
-          <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-            Meet AI Notes Bot
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">Automated meeting notes for Google Meet</p>
-        </header>
-
-        <div className="flex mb-4">
-          <button
-            className={`flex-1 py-2 transition-colors ${authMode === 'login' ? 'bg-emerald-100 text-emerald-700 font-medium' : 'bg-gray-100 text-gray-500'}`}
-            onClick={() => setAuthMode('login')}
-          >
-            Login
-          </button>
-          <button
-            className={`flex-1 py-2 transition-colors ${authMode === 'signup' ? 'bg-emerald-100 text-emerald-700 font-medium' : 'bg-gray-100 text-gray-500'}`}
-            onClick={() => setAuthMode('signup')}
-          >
-            Sign Up
-          </button>
-        </div>
-
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm animate-fadeIn">
-            {error}
-          </div>
-        )}
-
-        {authMode === 'login' ? (
-          <form onSubmit={handleLogin} className="flex flex-col gap-3">
-            <input name="email" type="email" placeholder="Email" required 
-              className="border border-gray-300 p-2 rounded-lg" 
-              defaultValue="alijanali0091@gmail.com" />
-            <input name="password" type="password" placeholder="Password" required 
-              className="border border-gray-300 p-2 rounded-lg" 
-              defaultValue="Alijan12#" />
-            <button 
-              type="submit" 
-              disabled={isLoading}
-              className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg p-2 transition-colors"
-            >
-              {isLoading ? 'Logging in...' : 'Login'}
-            </button>
-            <p className="text-xs text-center text-gray-500 mt-2">
-              Use the provided credentials or create a new account
-            </p>
-          </form>
-        ) : (
-          <form onSubmit={handleSignup} className="flex flex-col gap-3">
-            <input name="email" type="email" placeholder="Email" required 
-              className="border border-gray-300 p-2 rounded-lg" />
-            <input name="password" type="password" placeholder="Password" required 
-              className="border border-gray-300 p-2 rounded-lg" />
-            <input name="confirmPassword" type="password" placeholder="Confirm Password" required 
-              className="border border-gray-300 p-2 rounded-lg" />
-            <button 
-              type="submit" 
-              disabled={isLoading}
-              className="bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg p-2 transition-colors"
-            >
-              {isLoading ? 'Creating account...' : 'Sign Up'}
-            </button>
-          </form>
-        )}
-
-        <footer className="mt-auto pt-4 text-center text-xs text-gray-400">
-          <p>v1.0.0 • Powered by AI Notes API</p>
-        </footer>
+        <Header user={null} />
+        {/* <AuthForm
+          authMode={authMode}
+          isLoading={isLoading}
+          error={error}
+          onLogin={handleLogin}
+          onSignup={handleSignup}
+          setAuthMode={setAuthMode}
+        /> */}
+        <Footer />
       </div>
     );
   }
@@ -413,101 +328,19 @@ export default function Popup() {
   // Main UI (when logged in)
   return (
     <div className="w-full h-full p-5 bg-gradient-to-br from-slate-50 via-white to-slate-50 flex flex-col">
-      <header className="mb-5 text-center">
-        <div className="flex items-center justify-center mb-2">
-          <div className="bg-gradient-to-r from-emerald-500 to-teal-500 p-2 rounded-xl shadow-md">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="white"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="drop-shadow-sm"
-            >
-              <path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"></path>
-              <path d="M12 8v1"></path>
-              <path d="M12 15v1"></path>
-              <path d="M16 12h-1"></path>
-              <path d="M9 12H8"></path>
-              <path d="M15.7 9.7l-.7.7"></path>
-              <path d="M9.7 9.7l-.7-.7"></path>
-              <path d="M15.7 14.3l-.7-.7"></path>
-              <path d="M9.7 14.3l-.7.7"></path>
-            </svg>
-          </div>
-        </div>
-        <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-          Meet AI Notes Bot
-        </h1>
-        <p className="text-sm text-gray-500 mt-1">Automated meeting notes for Google Meet</p>
-        <div className="flex items-center justify-center text-xs text-gray-500 mt-2">
-          <span>Logged in as <span className="font-semibold">{user.email}</span></span>
-          <button 
-            onClick={handleLogout}
-            className="ml-2 text-red-500 hover:text-red-700 text-xs"
-          >
-            Logout
-          </button>
-        </div>
-        {user.is_verified === true && (
-          <div className="text-xs text-green-600 mt-1">
-            ✓ Account verified
-          </div>
-        )}
-      </header>
-
-      <div className="bg-white rounded-xl shadow-md p-4 mb-5 flex-grow border border-gray-100">
-        <StatusIndicator status={status} isGoogleMeet={isGoogleMeet} />
-        {isGoogleMeet && isInjected && (
-          <div className="mt-2 p-2 bg-green-50 border border-green-100 rounded text-green-700 text-xs">
-            ✓ Code injected into Google Meet
-          </div>
-        )}
-        {error && (
-          <div className="mt-3 p-3 bg-red-50 border border-red-100 rounded-lg text-red-600 text-sm animate-fadeIn">
-            {error}
-          </div>
-        )}
-        {!isGoogleMeet && status === "idle" && (
-          <div className="mt-3 p-3 bg-amber-50 border border-amber-100 rounded-lg text-amber-700 text-sm">
-            Please navigate to a Google Meet tab to use this extension.
-          </div>
-        )}
-        {isGoogleMeet && status === "idle" && (
-          <div className="mt-3 p-3 bg-emerald-50 border border-emerald-100 rounded-lg text-emerald-700 text-sm">
-            <p>✓ Ready to take notes for: {currentUrl}</p>
-          </div>
-        )}
-        {status === "joined" && (
-          <>
-            <div className="p-2 bg-blue-50 border border-blue-100 rounded-lg text-blue-700 text-sm mb-2">
-              Meeting in progress - AI is capturing notes
-            </div>
-            <div className="bg-gray-50 p-2 rounded-lg text-xs text-gray-700 max-h-24 overflow-y-auto border border-gray-200">
-              <pre className="whitespace-pre-wrap font-mono">{notes}</pre>
-            </div>
-          </>
-        )}
-        <div className="flex gap-3 justify-center mt-4">
-          {status === "idle" && isGoogleMeet && (
-            <ActionButton onClick={startBot} isLoading={isLoading} variant="primary">
-              Start Bot
-            </ActionButton>
-          )}
-          {status === "joined" && (
-            <ActionButton onClick={stopBot} variant="danger" isLoading={isLoading}>
-              Stop Bot
-            </ActionButton>
-          )}
-        </div>
-      </div>
-      <footer className="mt-4 text-center text-xs text-gray-400">
-        v1.0.0 • Powered by AI Notes API
-      </footer>
+      <Header user={user} onLogout={handleLogout} />
+      <MeetingStatusPanel
+        status={status}
+        isGoogleMeet={isGoogleMeet}
+        isInjected={isInjected}
+        error={error}
+        currentUrl={currentUrl}
+        notes={notes}
+        isLoading={isLoading}
+        onStart={startBot}
+        onStop={stopBot}
+      />
+      <Footer />
     </div>
   );
 }
