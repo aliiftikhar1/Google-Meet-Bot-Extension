@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const API_BASE_URL = "https://ainotestakerbackend.trylenoxinstruments.com";
+const API_BASE_URL = "https://newnotetakerbackend.trylenoxinstruments.com";
 const API_ENDPOINT = `${API_BASE_URL}/auth/getmydetails/`;
 const PLACEHOLDER_IMG = "https://ui-avatars.com/api/?background=00c6ae&color=fff&name=User";
 function getPlaceholderImage(name: string): string {

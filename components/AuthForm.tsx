@@ -18,7 +18,6 @@ const AuthForm: React.FC<AuthFormProps> = ({ authMode, isLoading, error, onLogin
     borderRadius: '12px',
     padding: '20px',
     width: '300px',
-    border: '1px solid rgba(255, 255, 255, 0.1)'
   }}>
     <div style={{
       display: 'flex',

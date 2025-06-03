@@ -17,7 +17,7 @@ interface Participant {
   isYou: boolean
 }
 
-const API_BASE_URL = "https://ainotestakerbackend.trylenoxinstruments.com/api" // Update with your actual API base URL
+const API_BASE_URL = "https://newnotetakerbackend.trylenoxinstruments.com/api" // Update with your actual API base URL
 
 const MeetControlPanel: React.FC<MeetControlPanelProps> = ({ initialStatus }) => {
   const [status, setStatus] = useState<"idle" | "awaiting" | "joined" | "stopped">(initialStatus)

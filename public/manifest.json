@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Google Meet AI Notes Bot",
+  "name": "Local Google Meet AI Notes Bot",
   "version": "1.0.0",
   "description": "AI-powered meeting notes for Google Meet",
   "action": {

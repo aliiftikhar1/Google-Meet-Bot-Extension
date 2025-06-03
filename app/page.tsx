@@ -37,7 +37,7 @@ type ActionButtonProps = {
 // API URLs
 // const API_BASE_URL = "https://ai-notetaker-backend-fwew.onrender.com";
 // const API_BASE_URL = "http://localhost:8000";
-const API_BASE_URL = "https://ainotestakerbackend.trylenoxinstruments.com";
+const API_BASE_URL = "https://newnotetakerbackend.trylenoxinstruments.com";
 const API_ENDPOINTS = {
   login: `${API_BASE_URL}/auth/login/`,
   signup: `${API_BASE_URL}/auth/signup/`,
